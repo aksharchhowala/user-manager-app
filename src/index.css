@@ -1,5 +1,61 @@
-@import "tailwindcss";
+/* Tailwind v4 layered imports */
+@layer theme, base, components, utilities;
 
-body{
-  background-color: var(--color-gray-950);
+/* Tailwind theme & variables */
+@import "tailwindcss/theme.css" layer(theme);
+
+/* --- Brand & Accent tokens --- */
+/* brand = ORANGE, accent = RED */
+@theme {
+  /* ORANGE — brand */
+  --color-brand-50:  #fff7ed;
+  --color-brand-100: #ffedd5;
+  --color-brand-200: #fed7aa;
+  --color-brand-300: #fdba74;
+  --color-brand-400: #fb923c;
+  --color-brand-500: #f97316;
+  --color-brand-600: #ea580c;   /* primary emphasis */
+  --color-brand-700: #c2410c;
+  --color-brand-800: #9a3412;
+  --color-brand-900: #7c2d12;
+
+  /* RED — accent (optional but handy) */
+  --color-accent-50:  #fef2f2;
+  --color-accent-100: #fee2e2;
+  --color-accent-200: #fecaca;
+  --color-accent-300: #fca5a5;
+  --color-accent-400: #f87171;
+  --color-accent-500: #ef4444;
+  --color-accent-600: #dc2626;
+  --color-accent-700: #b91c1c;
+  --color-accent-800: #991b1b;
+  --color-accent-900: #7f1d1d;
+}
+
+/* Preflight reset */
+@import "tailwindcss/preflight.css" layer(base);
+
+/* Core utilities (must be present for classes like bg-, leading-, etc.) */
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* --------- Global styles --------- */
+:root {
+  /* Light is default; dark is available via prefers-color-scheme or .dark (if you use it later) */
+  color-scheme: light dark;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+@layer base {
+  body {
+    /* Simple, elegant canvas (no gradient) */
+    @apply bg-slate-50 text-slate-800 antialiased
+           dark:bg-slate-950 dark:text-slate-100;
+
+    /* Subtle selection color using brand */
+    @apply selection:bg-brand-200 selection:text-slate-900
+           dark:selection:bg-brand-700 dark:selection:text-white;
+  }
 }
