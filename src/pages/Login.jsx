@@ -1,30 +1,49 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Lock, User } from "lucide-react";
 import Logo from "../components/Logo.jsx";
 import TextField from "../components/TextField.jsx";
 import PasswordField from "../components/PasswordField.jsx";
 import Button from "../components/Button.jsx";
+import axios from "../lib/axios-setup.js";
+import { consumeRedirect, setToken } from "../lib/auth.js";
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     const form = e.currentTarget;
     const username = form.elements.namedItem("username")?.value;
     const password = form.elements.namedItem("password")?.value;
 
-    if (!username || !password)
-      return alert("Please enter username and password.");
+    if (!username || !password) {
+      setError("Please enter username and password.");
+      return;
+    }
 
-    setLoading(true);
-    // Phase 2: replace with real ASP.NET API call
-    await new Promise((res) => setTimeout(res, 800));
-    setLoading(false);
-
-    console.log("Login submitted", { username, password: "••••" });
-    alert("Login attempt captured. Backend hookup coming next phase!");
+    try {
+      setLoading(true);
+      const res = await axios.post("/auth/login", {
+        userNameOrEmail: username,
+        password: password,
+      });
+      const token = res?.data?.access_token;
+      if (!token) throw new Error("No token returend from API");
+      setToken(token);
+      const stateFrom = location.state?.from;
+      const remember = consumeRedirect();
+      const to = stateFrom || remember || "/dashboard";
+      navigate(to, { replace: true });
+    } catch (err) {
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -63,6 +82,11 @@ export default function Login() {
           >
             <div className="space-y-1">
               <h2 className="text-2xl font-semibold">Sign in</h2>
+              {error && (
+                <div className="text-sm text-red-600" role="alert">
+                  {error}
+                </div>
+              )}
               <p className="text-sm text-slate-500">
                 Use your account credentials
               </p>
